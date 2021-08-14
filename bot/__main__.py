@@ -21,6 +21,7 @@ bot.add_handler(bot_misc.pm_check_handler)
 bot.add_handler(bot_misc.warns_check_handler)
 bot.add_handler(bot_misc.contact_me_handler)
 bot.add_handler(bot_misc.deny_user_handler)
+bot.add_handler(bot_misc.approve_user_handler)
 bot.add_handler(bot_misc.unblock_user_handler)
 
 

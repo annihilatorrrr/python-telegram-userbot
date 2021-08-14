@@ -3,6 +3,7 @@ from ..config import (bot_username,
                       warn_limit,
                       pm_log_group)
 from ..db import User
+from ..utils import allow_user
 from ..init import userbot
 from pyrogram import filters
 from pyrogram.types import (InlineKeyboardButton,
@@ -123,16 +124,50 @@ def handle_deny_user(client, msg):
     )
 
 
+def handle_approve_user(client, msg):
+    print('called')
+    try:
+        user = int(msg.data.split(' ')[1])
+    except (IndexError, ValueError):
+        return
+
+    try:
+        allow_user(user)
+    except Exception as e:
+        msg.answer('Unexpected error occured')
+        print(str(e))
+        return
+
+    msg.edit_message_text(
+        text='This user has been approved.'
+    )
+    userbot.send_message(
+        chat_id=user,
+        text='You have been approved.'
+    )
+
+
 def handle_unblock_user(client, msg):
     print('calling unblock')
     try:
         user = int(msg.data.split(' ')[1])
     except (IndexError, ValueError):
+        return
+
+    try:
+        allow_user(user)
+    except Exception as e:
+        msg.answer('Unexpected error occured')
         print(str(e))
         return
+
     userbot.unblock_user(user)
     msg.edit_message_text(
         text='This user has been unblocked',
+    )
+    userbot.send_message(
+        chat_id=user,
+        text='You have been approved.'
     )
 
 
@@ -155,6 +190,10 @@ deny_user_handler = CallbackQueryHandler(
     filters.regex('deny_user')
 )
 
+approve_user_handler = CallbackQueryHandler(
+    handle_approve_user,
+    filters.regex('approve_user')
+)
 
 unblock_user_handler = CallbackQueryHandler(
     handle_unblock_user,
