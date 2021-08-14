@@ -15,6 +15,8 @@ userbot.add_handler(group.get_chatid_handler)
 userbot.add_handler(group.new_member_handler)
 userbot.add_handler(urbandict.urbandict_handler)
 userbot.add_handler(users.pm_handler, group=-1)
+userbot.add_handler(users.approve_user_handler)
+userbot.add_handler(users.block_user_handler)
 
 logger.info('Initializing bot handlers')
 bot.add_handler(bot_misc.pm_check_handler)

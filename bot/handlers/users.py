@@ -55,6 +55,134 @@ def handle_pm(client, msg):
         msg.from_user.block()
 
 
+def handle_approve_user(client, msg):
+    """
+        Allow a person to PM.
+        Can be used inside group or PM.
+    """
+    if msg.reply_to_message:
+        """
+            Reply to can work in groups and private. Does not matter unlike the
+            next elif block.
+
+            All we need to check is if the user replied to his own message
+        """
+        user_id = msg.reply_to_message.from_user.id
+        """
+            Check if the replied to message is from client itself,
+            if so stop execution
+        """
+        # that check goes here lol
+    elif not msg.reply_to_message and msg.chat.type == 'private':
+        """
+            If there is no reply to message and the chat type is private
+            just grab the chat id as the user id.
+
+            That 'private' chat check is simply so that sending a .allow
+            command in a group without a reply does not make sense
+
+        """
+        user_id = msg.chat.id
+
+    if is_user(user_id):
+        user = get_user(user_id)
+        user.warns = 0
+        user.allowed = 1
+    else:
+        user = User(user_id=user_id,
+                    allowed=1,
+                    warns=0)
+
+    try:
+        user.save()
+    except Exception as e:
+        print(str(e))
+        msg.edit_text('Unexpected error occured. Failed to approve user')
+
+    """
+        Lets just call an unblock on the user just to be safe
+    """
+    try:
+        client.unblock_user(user_id)
+    except Exception as e:
+        """
+            User is probably not blocked
+        """
+        print(str(e))
+        pass
+
+    msg.edit_text('User has been approved')
+
+
+def handle_block_user(client, msg):
+    """
+        Block a person from PM-ing.
+        Can be used inside group or PM.
+    """
+    if msg.reply_to_message:
+        """
+            Reply to can work in groups and private. Does not matter unlike the
+            next elif block.
+
+            All we need to check is if the user replied to his own message
+        """
+        user_id = msg.reply_to_message.from_user.id
+        """
+            Check if the replied to message is from client itself,
+            if so stop execution
+        """
+        # that check goes here lol
+    elif not msg.reply_to_message and msg.chat.type == 'private':
+        """
+            If there is no reply to message and the chat type is private
+            just grab the chat id as the user id.
+
+            That 'private' chat check is simply so that sending a .allow
+            command in a group without a reply does not make sense
+
+        """
+        user_id = msg.chat.id
+
+    if is_user(user_id):
+        user = get_user(user_id)
+        user.warns = 5
+        user.allowed = 0
+    else:
+        user = User(user_id=user_id,
+                    allowed=0,
+                    warns=5)
+
+    try:
+        user.save()
+    except Exception as e:
+        print(str(e))
+        msg.edit_text('Unexpected error occured. Failed to approve user')
+
+    """
+        Lets just call an unblock on the user just to be safe
+    """
+    try:
+        client.block_user(user_id)
+    except Exception as e:
+        """
+            User is probably already blocked
+        """
+        print(str(e))
+        pass
+
+    msg.edit_text('Person has been blocked')
+
+
 pm_handler = MessageHandler(
     handle_pm,
     (filters.private & ~filters.me) & ~filters.bot)
+
+approve_user_handler = MessageHandler(
+    handle_approve_user,
+    filters.command('allow', '.')
+)
+
+block_user_handler = MessageHandler(
+    handle_block_user,
+    filters.command('block', '.')
+)
