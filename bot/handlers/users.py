@@ -3,7 +3,8 @@ from pyrogram.handlers import MessageHandler
 from ..db import User
 from ..config import bot_username, warn_limit
 from ..utils import (get_users,
-                     is_user)
+                     is_user,
+                     get_user)
 
 allowed_users = get_users(allowed=True)
 
@@ -31,7 +32,7 @@ def handle_pm(client, msg):
         user.save()
     else:
         msg_sent = True
-        user = User.get(User.user_id == from_user)
+        user = get_user(from_user)
         user.warns = user.warns + 1
         user.save()
 
