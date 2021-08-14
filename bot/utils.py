@@ -22,6 +22,20 @@ def get_users(allowed: bool):
     return data
 
 
+def is_user(user_id: int):
+    """
+        Check if the user exists in the database
+    """
+    return User.select().where(User.user_id == user_id).count()
+
+
+def get_user(user_id: int):
+    """
+        Return User's peewee model instance
+    """
+    return User.select().where(User.user_id == user_id).get()
+
+
 def allow_user(user_id: int):
     user = User.select().where(
         User.user_id == user_id
@@ -41,7 +55,7 @@ def allow_user(user_id: int):
         except Exception:
             raise
     else:
-        user = User.select().where(User.user_id == user_id).get()
+        user = get_user(user_id)
         user.warns = 0
         user.allowed = 1
         try:
@@ -50,8 +64,34 @@ def allow_user(user_id: int):
             raise
 
 
-def is_user(user_id: int):
+def block_user(user_id: int):
+    if not is_user(user_id):
+        user = User(
+            user_id=user_id,
+            allowed=0,
+            warns=5
+        )
+        try:
+            user.save()
+        except Exception:
+            raise
+    else:
+        user = get_user(user_id)
+        user.warns = 5
+        user.allowed = 0
+        try:
+            user.save()
+        except Exception:
+            raise
+
+
+
+
+def get_user_warns(user_id: int):
     """
-        Check if the user exists in the database
+        Get the warns of a user
     """
-    return User.select().where(User.user_id == user_id).count()
+    return (
+        User.select().where(User.user_id == user_id)
+        .get()
+        .warns)

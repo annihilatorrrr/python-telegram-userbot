@@ -2,7 +2,8 @@ from pyrogram import filters
 from pyrogram.handlers import MessageHandler
 from ..db import User
 from ..config import bot_username, warn_limit
-from ..utils import get_users
+from ..utils import (get_users,
+                     is_user)
 
 allowed_users = get_users(allowed=True)
 
@@ -17,11 +18,7 @@ def handle_pm(client, msg):
         if so increment his warns for recurring PMs.
         If not create an entry for him
     """
-    query = User.select(User.user_id).where(
-        User.user_id == from_user
-    )
-
-    if not query.count():
+    if not is_user(from_user):
         """
             msg_sent is a simple flag to understand that
             this user has already received a forwarded message from
@@ -48,8 +45,6 @@ def handle_pm(client, msg):
             hide_via=True
         )
 
-    # Delete the users message
-    msg.delete()
     if user.warns >= warn_limit:
         # Block the user as warn limit have increased
         client.send_message(

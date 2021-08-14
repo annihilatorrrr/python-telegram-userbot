@@ -3,7 +3,9 @@ from ..config import (bot_username,
                       warn_limit,
                       pm_log_group)
 from ..db import User
-from ..utils import allow_user
+from ..utils import (allow_user,
+                     is_user,
+                     get_user_warns)
 from ..init import userbot
 from pyrogram import filters
 from pyrogram.types import (InlineKeyboardButton,
@@ -68,14 +70,11 @@ def handle_pm_check(client, msg):
 
 def handle_warns_check(client, msg):
     userid = msg.from_user.id
-    user = User.select().where(
-        User.user_id == userid
-    )
-    if not user.count():
+    if not is_user(userid):
         return False
-    user = user[0]
+    warns = get_user_warns(userid)
     msg.answer(
-        text=f'You have {user.warns}/{warn_limit} warnings.'
+        text=f'You have {warns}/{warn_limit} warnings.'
     )
 
 
@@ -125,7 +124,6 @@ def handle_deny_user(client, msg):
 
 
 def handle_approve_user(client, msg):
-    print('called')
     try:
         user = int(msg.data.split(' ')[1])
     except (IndexError, ValueError):
@@ -148,7 +146,6 @@ def handle_approve_user(client, msg):
 
 
 def handle_unblock_user(client, msg):
-    print('calling unblock')
     try:
         user = int(msg.data.split(' ')[1])
     except (IndexError, ValueError):
