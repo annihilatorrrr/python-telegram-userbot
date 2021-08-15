@@ -17,7 +17,9 @@ def load_allowed_users():
     """
         Loads all allowed users into cache on startup
     """
-    for user in User.select():
+    for user in User.select().where(
+        User.allowed == 1
+    ):
         allowed_users.add(user.user_id, user)
 
 
