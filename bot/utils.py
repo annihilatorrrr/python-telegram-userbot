@@ -1,4 +1,4 @@
-from .db import Filter, User
+from .db import Filter, User, allowed_users
 
 
 def get_message_filters():
@@ -11,6 +11,14 @@ def get_message_filters():
             cfg['reply_text'] = x.reply_text
         data[x.filter_text] = cfg
     return data
+
+
+def load_allowed_users():
+    """
+        Loads all allowed users into cache on startup
+    """
+    for user in User.select():
+        allowed_users.add(user.user_id, user)
 
 
 def get_users(allowed: bool):
@@ -62,6 +70,7 @@ def allow_user(user_id: int):
             user.save()
         except Exception:
             raise
+    return user
 
 
 def block_user(user_id: int):
@@ -84,7 +93,7 @@ def block_user(user_id: int):
         except Exception:
             raise
 
-
+    return user
 
 
 def get_user_warns(user_id: int):

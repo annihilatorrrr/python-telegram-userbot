@@ -6,8 +6,16 @@ from .handlers import (filters as message_filters,
                        urbandict,
                        users,
                        bot_misc)
+from .utils import load_allowed_users
 
-logger.info('Initializing userbot handlers')
+
+logger.info('Loading user info to cache')
+load_allowed_users()
+
+logger.info('Loading filters into cache')
+
+
+logger.info('Attaching userbot handlers')
 userbot.add_handler(message_filters.add_filter_handler)
 userbot.add_handler(message_filters.rm_filter_handler)
 userbot.add_handler(message_filters.process_filter_handler, group=-1)
@@ -18,7 +26,7 @@ userbot.add_handler(users.pm_handler, group=-1)
 userbot.add_handler(users.approve_user_handler)
 userbot.add_handler(users.block_user_handler)
 
-logger.info('Initializing bot handlers')
+logger.info('Attaching bot handlers')
 bot.add_handler(bot_misc.pm_check_handler)
 bot.add_handler(bot_misc.warns_check_handler)
 bot.add_handler(bot_misc.contact_me_handler)

@@ -1,5 +1,15 @@
-from peewee import *
-from datetime import datetime
+from .schema import UserSchema, FilterSchema
+from .cache import Cache
+from peewee import (
+    Model,
+    BigIntegerField,
+    TextField,
+    BooleanField,
+    SqliteDatabase
+)
+
+allowed_users = Cache(UserSchema)
+filters_cache = Cache(FilterSchema)
 
 db = SqliteDatabase('data.db')
 
@@ -21,5 +31,6 @@ class User(Model):
 
     class Meta:
         database = db
+
 
 db.create_tables([Filter, User])
