@@ -7,6 +7,9 @@ class FilterSchema(BaseModel):
     filter_text: str
     reply_text: Optional[str]
 
+    def can_copy(self):
+        return bool(self.message_id)
+
     class Config:
         orm_mode = True
 
