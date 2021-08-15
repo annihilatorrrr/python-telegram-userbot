@@ -1,9 +1,7 @@
 from pyrogram import filters
 from pyrogram.handlers import MessageHandler
-from .. import utils
 from ..db import Filter, message_filters
 from ..config import log_group
-from logzero import logger
 
 
 def handle_add_filter(client, msg):
@@ -54,19 +52,33 @@ def handle_remove_filter(client, msg):
 def process_filter(client, msg):
     msg_text = msg.text or msg.caption
     if msg_text:
+        """
+            Cast all of this to set to check intersection
+            to see if the message contains any words that
+            trigger a defined filter
+        """
         filter_keys = set(message_filters.allkeys())
         text_words = set(msg_text.split(' '))
+        """
+            Get all matched filters
+        """
         intersection = filter_keys.intersection(text_words)
         if not len(intersection):
             return False
         matches = list(intersection)
+        """
+            Get the first matched filter
+        """
         filter_text = matches[0]
         try:
             filterr = message_filters.get(filter_text)
         except Exception:
             return False
 
-        if filterr.message_id:
+        if filterr.can_copy():
+            """
+                Copy the message if its a presaved message for the filter
+            """
             # copy message
             client.copy_message(
                 from_chat_id=log_group,
@@ -75,6 +87,9 @@ def process_filter(client, msg):
                 reply_to_message_id=msg.message_id
             )
         else:
+            """
+                If not just send the defined reply_text for the filter
+            """
             msg.reply_text(filterr.reply_text)
 
     msg.continue_propagation()
