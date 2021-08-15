@@ -69,6 +69,9 @@ class Cache:
             raise Exception('key does not exist')
         return val
 
+    def allkeys(self):
+        return self.data.keys()
+
     def exists(self, key):
         return key in self.data
 
