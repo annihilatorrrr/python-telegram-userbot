@@ -9,7 +9,7 @@ from peewee import (
 )
 
 allowed_users = Cache(UserSchema)
-filters_cache = Cache(FilterSchema)
+message_filters = Cache(FilterSchema)
 
 db = SqliteDatabase('data.db')
 

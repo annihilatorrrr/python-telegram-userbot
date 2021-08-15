@@ -7,6 +7,9 @@ class FilterSchema(BaseModel):
     filter_text: str
     reply_text: Optional[str]
 
+    class Config:
+        orm_mode = True
+
 
 class UserSchema(BaseModel):
     user_id: int = Field(source='id')
