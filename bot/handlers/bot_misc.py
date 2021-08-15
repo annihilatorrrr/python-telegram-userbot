@@ -1,25 +1,24 @@
-from ..config import (bot_username,
-                      owner_id,
+from ..config import (owner_id,
                       warn_limit,
                       pm_log_group)
-from ..db import User
+from ..db import allowed_users
 from ..utils import (allow_user,
+                     block_user,
                      is_user,
                      get_user_warns)
 from ..init import userbot
 from pyrogram import filters
 from pyrogram.types import (InlineKeyboardButton,
                             InlineKeyboardMarkup,
-                            InlineQueryResult,
                             InlineQueryResultArticle,
                             InputTextMessageContent)
-from pyrogram.handlers import (MessageHandler,
-                               InlineQueryHandler,
-                               CallbackQueryHandler)
+from pyrogram.handlers import (
+        InlineQueryHandler,
+        CallbackQueryHandler
+)
 
 
 def deny_access(msg):
-    answers = []
     msg.answer(
         results=[],
         switch_pm_text='You are not authorized to use this bot.',
@@ -31,11 +30,6 @@ def deny_access(msg):
 
 
 def send_pm_engine(msg):
-    try:
-        userid = int(msg.query.split(' ')[1])
-    except (KeyError, ValueError):
-        return
-
     keyboard = InlineKeyboardMarkup(
         [
             [
@@ -116,7 +110,18 @@ def handle_deny_user(client, msg):
             ]
         ]
     )
+    """
+        Update the entires in db
+    """
+    user_m = block_user(user)
+    """
+        Block the user in telegram
+    """
     userbot.block_user(user)
+    """
+        Remove from allowed users cache if exists
+    """
+    allowed_users.remove(user)
     msg.edit_message_text(
         text='This user has been blocked',
         reply_markup=keyboard
@@ -130,7 +135,7 @@ def handle_approve_user(client, msg):
         return
 
     try:
-        allow_user(user)
+        user_m = allow_user(user)
     except Exception as e:
         msg.answer('Unexpected error occured')
         print(str(e))
@@ -139,6 +144,10 @@ def handle_approve_user(client, msg):
     msg.edit_message_text(
         text='This user has been approved.'
     )
+    """
+        Add user into allowed users cache
+    """
+    allowed_users.add(user, user_m, replace=True)
     userbot.send_message(
         chat_id=user,
         text='You have been approved.'
@@ -152,7 +161,7 @@ def handle_unblock_user(client, msg):
         return
 
     try:
-        allow_user(user)
+        user_m = allow_user(user)
     except Exception as e:
         msg.answer('Unexpected error occured')
         print(str(e))
@@ -162,6 +171,10 @@ def handle_unblock_user(client, msg):
     msg.edit_message_text(
         text='This user has been unblocked',
     )
+    """
+        Add user into allowed users cache
+    """
+    allowed_users.add(user, user_m, replace=True)
     userbot.send_message(
         chat_id=user,
         text='You have been approved.'

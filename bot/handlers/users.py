@@ -1,12 +1,10 @@
 from pyrogram import filters
 from pyrogram.handlers import MessageHandler
-from ..db import User
+from ..db import User, allowed_users
 from ..config import bot_username, warn_limit
 from ..utils import (get_users,
                      is_user,
                      get_user)
-
-allowed_users = get_users(allowed=True)
 
 
 def handle_pm(client, msg):
@@ -110,7 +108,10 @@ def handle_approve_user(client, msg):
         """
         print(str(e))
         pass
-
+    """
+        Add approved user to cache
+    """
+    allowed_users.add(user_id, user, replace=True)
     msg.edit_text('User has been approved')
 
 
@@ -159,7 +160,7 @@ def handle_block_user(client, msg):
         msg.edit_text('Unexpected error occured. Failed to approve user')
 
     """
-        Lets just call an unblock on the user just to be safe
+        Call block on the user
     """
     try:
         client.block_user(user_id)
@@ -170,6 +171,10 @@ def handle_block_user(client, msg):
         print(str(e))
         pass
 
+    """
+        Remove user from allowed_users cache
+    """
+    allowed_users.remove(user_id)
     msg.edit_text('Person has been blocked')
 
 
