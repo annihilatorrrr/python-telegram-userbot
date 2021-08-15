@@ -1,4 +1,7 @@
-from .db import Filter, User, allowed_users
+from .db import (Filter,
+                 User,
+                 allowed_users,
+                 message_filters)
 
 
 def get_message_filters():
@@ -11,6 +14,18 @@ def get_message_filters():
             cfg['reply_text'] = x.reply_text
         data[x.filter_text] = cfg
     return data
+
+
+def load_message_filters():
+    """
+        Load all configured message filters into cache on startup
+    """
+    for filt in Filter.select():
+        message_filters.add(
+            filt.filter_text,
+            filt,
+            replace=True
+        )
 
 
 def load_allowed_users():

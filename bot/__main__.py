@@ -6,13 +6,14 @@ from .handlers import (filters as message_filters,
                        urbandict,
                        users,
                        bot_misc)
-from .utils import load_allowed_users
+from .utils import (load_allowed_users,
+                    load_message_filters)
 
 
 logger.info('Loading user info to cache')
 load_allowed_users()
-
 logger.info('Loading filters into cache')
+load_message_filters()
 
 
 logger.info('Attaching userbot handlers')
