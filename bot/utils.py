@@ -1,5 +1,6 @@
 from .db import (Filter,
                  User,
+                 Group,
                  allowed_users,
                  message_filters,
                  allowed_groups)
@@ -21,8 +22,8 @@ def load_allowed_groups():
     """
         Load all allowed groups into cache on startup
     """
-    for group in Filter.select():
-        allowed_groups.add(group.id, group.id)
+    for group in Group.select():
+        allowed_groups.add(group.group_id, group.group_id)
 
 
 def load_message_filters():

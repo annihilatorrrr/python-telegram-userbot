@@ -1,6 +1,7 @@
 from pyrogram import filters
 from pyrogram.handlers import MessageHandler
 from ..db import allowed_groups, Group
+from ..filters import allowed_group_filter
 from logzero import logger
 
 
@@ -59,14 +60,18 @@ def handle_disallow_group(client, msg):
     msg.delete()
 
 
+def handle_random(client, msg):
+    print('i got random')
+
+
 new_member_handler = MessageHandler(
     handle_join,
-    filters.new_chat_members & ~filters.me
+    ((filters.new_chat_members & ~filters.me) & allowed_group_filter)
 )
 
 new_member_handler = MessageHandler(
     handle_leave,
-    filters.left_chat_member & ~filters.me
+    ((filters.left_chat_member & ~filters.me) & allowed_group_filter)
 )
 
 get_chatid_handler = MessageHandler(
@@ -82,4 +87,9 @@ allow_group_handler = MessageHandler(
 disallow_group_handler = MessageHandler(
     handle_disallow_group,
     (filters.command('block_group', '.') & filters.me) & ~filters.private
+)
+
+random_handler = MessageHandler(
+    handle_random,
+    ((filters.command('random', '.') & filters.me) & allowed_group_filter)
 )
