@@ -1,5 +1,6 @@
 from pyrogram import filters
 from pyrogram.handlers import MessageHandler
+from ..db import allowed_groups, Group
 from logzero import logger
 
 
@@ -25,6 +26,39 @@ def handle_leave(client, msg):
     msg.delete()
 
 
+def handle_allow_group(client, msg):
+    q = Group.select().where(
+        Group.group_id == msg.chat.id
+    )
+
+    if q.count():
+        msg.delete()
+        return
+
+    g = Group(group_id=msg.chat.id)
+    g.save()
+    allowed_groups.add(msg.chat.id, msg.chat.id, replace=True)
+    msg.delete()
+
+
+def handle_disallow_group(client, msg):
+    q = Group.select().where(
+        Group.group_id == msg.chat.id
+    )
+
+    if not q.count():
+        msg.delete()
+        return
+
+    try:
+        Group.delete().where(Group.group_id == msg.chat.id).execute()
+        allowed_groups.remove(msg.chat.id)
+    except Exception as e:
+        print(str(e))
+
+    msg.delete()
+
+
 new_member_handler = MessageHandler(
     handle_join,
     filters.new_chat_members & ~filters.me
@@ -38,4 +72,14 @@ new_member_handler = MessageHandler(
 get_chatid_handler = MessageHandler(
     handle_chat_id,
     filters.command('chat_id', '.') & filters.me
+)
+
+allow_group_handler = MessageHandler(
+    handle_allow_group,
+    (filters.command('allow_group', '.') & filters.me) & ~filters.private
+)
+
+disallow_group_handler = MessageHandler(
+    handle_disallow_group,
+    (filters.command('block_group', '.') & filters.me) & ~filters.private
 )

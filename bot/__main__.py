@@ -7,13 +7,16 @@ from .handlers import (filters as message_filters,
                        users,
                        bot_misc)
 from .utils import (load_allowed_users,
-                    load_message_filters)
+                    load_message_filters,
+                    load_allowed_groups)
 
 
 logger.info('Loading user info to cache')
 load_allowed_users()
 logger.info('Loading filters into cache')
 load_message_filters()
+logger.info('Loading allowed groups into cache')
+load_allowed_groups()
 
 
 logger.info('Attaching userbot handlers')
@@ -22,6 +25,8 @@ userbot.add_handler(message_filters.rm_filter_handler)
 userbot.add_handler(message_filters.process_filter_handler, group=-1)
 userbot.add_handler(group.get_chatid_handler)
 userbot.add_handler(group.new_member_handler)
+userbot.add_handler(group.allow_group_handler)
+userbot.add_handler(group.disallow_group_handler)
 userbot.add_handler(urbandict.urbandict_handler)
 userbot.add_handler(users.pm_handler, group=-1)
 userbot.add_handler(users.approve_user_handler)

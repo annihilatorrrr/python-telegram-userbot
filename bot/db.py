@@ -10,6 +10,7 @@ from peewee import (
 
 allowed_users = Cache(UserSchema)
 message_filters = Cache(FilterSchema)
+allowed_groups = Cache()
 
 db = SqliteDatabase('data.db')
 
@@ -33,4 +34,11 @@ class User(Model):
         database = db
 
 
-db.create_tables([Filter, User])
+class Group(Model):
+    group_id = BigIntegerField(unique=True)
+
+    class Meta:
+        database = db
+
+
+db.create_tables([Filter, User, Group])

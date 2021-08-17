@@ -1,7 +1,8 @@
 from .db import (Filter,
                  User,
                  allowed_users,
-                 message_filters)
+                 message_filters,
+                 allowed_groups)
 
 
 def get_message_filters():
@@ -14,6 +15,14 @@ def get_message_filters():
             cfg['reply_text'] = x.reply_text
         data[x.filter_text] = cfg
     return data
+
+
+def load_allowed_groups():
+    """
+        Load all allowed groups into cache on startup
+    """
+    for group in Filter.select():
+        allowed_groups.add(group.id, group.id)
 
 
 def load_message_filters():
