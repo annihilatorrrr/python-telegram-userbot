@@ -1,7 +1,8 @@
 from ..config import (owner_id,
                       warn_limit,
-                      pm_log_group)
-from ..db import allowed_users
+                      pm_log_group,
+                      about_me)
+from ..db import allowed_users, User
 from ..utils import (allow_user,
                      block_user,
                      is_user,
@@ -30,16 +31,26 @@ def deny_access(msg):
 
 
 def send_pm_engine(msg):
+    user_id = int(msg.query.split(' ')[1])
+    user = User.select().where(User.user_id == user_id)
+    if not user.count():
+        warns = 1
+    else:
+        user = user.get()
+        warns = user.warns
     keyboard = InlineKeyboardMarkup(
         [
             [
-                InlineKeyboardButton(text='Contact me',
-                                     callback_data='contact_me'),
-                InlineKeyboardButton(text='I need money',
-                                     callback_data='money_me'),
+                InlineKeyboardButton(text='Warns', callback_data='warns_me'),
+                InlineKeyboardButton(text=f'{warns}/5',
+                                     callback_data='warns_me'),
             ],
             [
-                InlineKeyboardButton(text='Warns', callback_data='warns_me'),
+                InlineKeyboardButton(text='Contact me',
+                                     callback_data='contact_me'),
+
+                InlineKeyboardButton(text='About',
+                                     callback_data='about_me'),
             ]
         ]
     )
@@ -95,6 +106,10 @@ def handle_contact_me(client, msg):
     msg.answer(
         'Owner has been notified.'
     )
+
+
+def handle_about_me(client, msg):
+    msg.answer(about_me)
 
 
 def handle_deny_user(client, msg):
@@ -193,6 +208,11 @@ warns_check_handler = CallbackQueryHandler(
 contact_me_handler = CallbackQueryHandler(
     handle_contact_me,
     filters.regex('contact_me')
+)
+
+about_me_handler = CallbackQueryHandler(
+    handle_about_me,
+    filters.regex('about_me')
 )
 
 deny_user_handler = CallbackQueryHandler(

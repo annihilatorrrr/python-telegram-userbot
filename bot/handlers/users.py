@@ -1,10 +1,24 @@
 from pyrogram import filters
 from pyrogram.handlers import MessageHandler
-from ..db import User, allowed_users
-from ..config import bot_username, warn_limit
+from ..init import bot
+from ..db import User, allowed_users, messages_cache
+from ..config import (bot_username, warn_limit,
+                      pm_log_group)
+
 from ..utils import (get_users,
                      is_user,
                      get_user)
+
+
+def send_pm_engine(client, msg):
+    res = client.get_inline_bot_results(bot_username,
+                                        f'pm_check {msg.from_user.id}')
+    return client.send_inline_bot_result(
+        msg.chat.id,
+        query_id=res.query_id,
+        result_id=res.results[0].id,
+        hide_via=True
+    )
 
 
 def handle_pm(client, msg):
@@ -25,24 +39,39 @@ def handle_pm(client, msg):
 
             If this flag is true, further messages wont be sent.
         """
-        msg_sent = False
         user = User(user_id=from_user, warns=1, allowed=0)
         user.save()
     else:
-        msg_sent = True
         user = get_user(from_user)
         user.warns = user.warns + 1
         user.save()
 
-    if not msg_sent:
-        res = client.get_inline_bot_results(bot_username,
-                                            f'pm_check {from_user}')
-        client.send_inline_bot_result(
-            msg.chat.id,
-            query_id=res.query_id,
-            result_id=res.results[0].id,
-            hide_via=True
+    """
+        If PM engine has already been sent, grab its ID and
+        delete the message.
+    """
+
+    if messages_cache.exists(from_user):
+        del_id = messages_cache.get(from_user)
+        client.delete_messages(
+            chat_id=msg.chat.id,
+            message_ids=del_id
         )
+
+    """
+        Delete the sender's message.
+        Cos otherwise its annoying, no.
+    """
+    msg.delete()
+    """
+        Send PM engine and grab the message id
+    """
+    message = send_pm_engine(client, msg)
+    message_id = message.updates[0].id
+    """
+        Upsert the message id for the user in messages cache
+    """
+    messages_cache.add(from_user, message_id, replace=True)
 
     if user.warns >= warn_limit:
         # Block the user as warn limit have increased
@@ -51,6 +80,16 @@ def handle_pm(client, msg):
             text='You have reached all 5 warnings. You will be blocked'
         )
         msg.from_user.block()
+        """
+            Block notification to PMLog
+        """
+        client.send_message(
+            chat_id=pm_log_group,
+            text=(f'{msg.from_user.first_name}({msg.from_user.id})'
+                  ' was blocked for reaching maximum warns.')
+        )
+
+    # msg.delete()
 
 
 def handle_approve_user(client, msg):

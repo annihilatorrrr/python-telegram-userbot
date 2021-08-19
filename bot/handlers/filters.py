@@ -91,7 +91,6 @@ def process_filter(client, msg):
                 If not just send the defined reply_text for the filter
             """
             msg.reply_text(filterr.reply_text)
-
     msg.continue_propagation()
 
 
@@ -107,5 +106,5 @@ rm_filter_handler = MessageHandler(
 
 process_filter_handler = MessageHandler(
     process_filter,
-    (filters.media | filters.text) & ~filters.me
+    (filters.media | filters.text) & (~filters.me & ~filters.private)
 )

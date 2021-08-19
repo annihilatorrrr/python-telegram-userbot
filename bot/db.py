@@ -11,6 +11,7 @@ from peewee import (
 allowed_users = Cache(UserSchema)
 message_filters = Cache(FilterSchema)
 allowed_groups = Cache()
+messages_cache = Cache()
 
 db = SqliteDatabase('data.db')
 

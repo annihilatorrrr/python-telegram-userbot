@@ -12,3 +12,7 @@ bot_username = os.getenv('bot_username')
 owner_id = int(os.getenv('owner_id'))
 warn_limit = int(os.getenv('warn_limit'))
 pm_log_group = int(os.getenv('pm_log_group'))
+
+about_me = """
+Hey friends, i am an about text. :)))
+"""
