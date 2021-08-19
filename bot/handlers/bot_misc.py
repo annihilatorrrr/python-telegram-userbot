@@ -160,6 +160,15 @@ def handle_approve_user(client, msg):
         text='This user has been approved.'
     )
     """
+        Call unblock on this user just to be safe
+    """
+    try:
+        userbot.unblock_user(user)
+    except Exception as e:
+        print(str(e))
+        pass
+
+    """
         Add user into allowed users cache
     """
     allowed_users.add(user, user_m, replace=True)
