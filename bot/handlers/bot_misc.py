@@ -1,7 +1,8 @@
 from ..config import (owner_id,
                       warn_limit,
                       pm_log_group,
-                      about_me)
+                      about_me,
+                      pm_photo)
 from ..db import allowed_users, User
 from ..utils import (allow_user,
                      block_user,
@@ -11,8 +12,7 @@ from ..init import userbot
 from pyrogram import filters
 from pyrogram.types import (InlineKeyboardButton,
                             InlineKeyboardMarkup,
-                            InlineQueryResultArticle,
-                            InputTextMessageContent)
+                            InlineQueryResultPhoto)
 from pyrogram.handlers import (
         InlineQueryHandler,
         CallbackQueryHandler
@@ -54,11 +54,10 @@ def send_pm_engine(msg):
             ]
         ]
     )
-    answer = InlineQueryResultArticle(
+    answer = InlineQueryResultPhoto(
         title='PM Security',
-        input_message_content=InputTextMessageContent(
-            'Hold it right there. I don\'t know you.\nWhat is your purpose?'
-        ),
+        photo_url=pm_photo,
+        caption='Hold it right there. I do not know you.',
         reply_markup=keyboard
     )
     msg.answer([answer], cache_time=0, is_personal=0)
@@ -67,7 +66,6 @@ def send_pm_engine(msg):
 def handle_pm_check(client, msg):
     userid = msg.from_user.id
     if userid != owner_id:
-        print('owner mismatch')
         return deny_access(msg)
 
     send_pm_engine(msg)

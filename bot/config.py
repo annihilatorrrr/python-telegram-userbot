@@ -12,7 +12,7 @@ bot_username = os.getenv('bot_username')
 owner_id = int(os.getenv('owner_id'))
 warn_limit = int(os.getenv('warn_limit'))
 pm_log_group = int(os.getenv('pm_log_group'))
-
+pm_photo = 'https://visualdon.uk/wp-content/uploads/2019/04/1.00_00_04_00.Still002.jpg'
 about_me = """
 Hey friends, i am an about text. :)))
 """
