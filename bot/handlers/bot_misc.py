@@ -51,6 +51,10 @@ def send_pm_engine(msg):
 
                 InlineKeyboardButton(text='About',
                                      callback_data='about_me'),
+            ],
+            [
+                InlineKeyboardButton(text='Misc',
+                                     callback_data='misc_me')
             ]
         ]
     )
@@ -154,6 +158,9 @@ def handle_approve_user(client, msg):
         print(str(e))
         return
 
+    """
+        Add the user to allowed_users cache
+    """
     msg.edit_message_text(
         text='This user has been approved.'
     )
@@ -203,6 +210,10 @@ def handle_unblock_user(client, msg):
     )
 
 
+def handle_misc_me(client, msg):
+    msg.answer('This text will be replaced')
+
+
 pm_check_handler = InlineQueryHandler(
     handle_pm_check,
     filters.regex('pm_check'))
@@ -220,6 +231,11 @@ contact_me_handler = CallbackQueryHandler(
 about_me_handler = CallbackQueryHandler(
     handle_about_me,
     filters.regex('about_me')
+)
+
+about_me_handler = CallbackQueryHandler(
+    handle_misc_me,
+    filters.regex('misc_me')
 )
 
 deny_user_handler = CallbackQueryHandler(
