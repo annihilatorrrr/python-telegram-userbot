@@ -219,7 +219,9 @@ def handle_block_user(client, msg):
 
 pm_handler = MessageHandler(
     handle_pm,
-    (filters.private & ~filters.me) & ~filters.bot)
+    (
+        (filters.private & ~filters.me) & ~filters.bot) & ~filters.chat(777000)
+    )
 
 approve_user_handler = MessageHandler(
     handle_approve_user,
