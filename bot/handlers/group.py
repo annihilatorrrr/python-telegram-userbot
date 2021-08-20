@@ -69,7 +69,7 @@ new_member_handler = MessageHandler(
     ((filters.new_chat_members & ~filters.me) & allowed_group_filter)
 )
 
-new_member_handler = MessageHandler(
+member_exit_handler = MessageHandler(
     handle_leave,
     ((filters.left_chat_member & ~filters.me) & allowed_group_filter)
 )
