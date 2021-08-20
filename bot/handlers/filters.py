@@ -1,5 +1,6 @@
 from pyrogram import filters
 from pyrogram.handlers import MessageHandler
+from ..filters import allowed_group_filter
 from ..db import Filter, message_filters
 from ..config import log_group
 
@@ -7,7 +8,7 @@ from ..config import log_group
 def handle_add_filter(client, msg):
     if len(msg.command) <= 1:
         return False
-    filter_text = msg.command[1]
+    filter_text = msg.command[1].lower()
     message_id = None
     reply_text = None
 
@@ -51,18 +52,22 @@ def handle_remove_filter(client, msg):
 
 def process_filter(client, msg):
     msg_text = msg.text or msg.caption
+    # msg_text = msg_text.lower()
     if msg_text:
+        msg_text = msg_text.lower()
         """
             Cast all of this to set to check intersection
             to see if the message contains any words that
             trigger a defined filter
         """
-        filter_keys = set(message_filters.allkeys())
+        filter_keys = [key.lower() for key in message_filters.allkeys()]
+        filter_keys = set(filter_keys)
         text_words = set(msg_text.split(' '))
         """
             Get all matched filters
         """
         intersection = filter_keys.intersection(text_words)
+        print(intersection)
         if not len(intersection):
             return False
         matches = list(intersection)
@@ -106,5 +111,8 @@ rm_filter_handler = MessageHandler(
 
 process_filter_handler = MessageHandler(
     process_filter,
-    (filters.media | filters.text) & (~filters.me & ~filters.private)
+    (
+        (filters.media | filters.text) & (~filters.me & ~filters.private)
+        & allowed_group_filter
+    )
 )
