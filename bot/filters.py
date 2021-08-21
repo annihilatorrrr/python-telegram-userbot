@@ -1,8 +1,11 @@
 from .db import allowed_groups
 from pyrogram import filters
 
-allowed_group_filter = filters.create(
-    lambda _, __, update: update.chat.id in allowed_groups)
+
+def is_allowed_group(_, __, update):
+    if update.chat.type == 'private':
+        return False
+    return update.chat.id in allowed_groups
 
 
 def is_welcome_enabled(_, __, update):
@@ -32,3 +35,4 @@ def is_service_removal_enabled(_, __, update):
 welcome_enabled_filter = filters.create(is_welcome_enabled)
 leave_enabled_filter = filters.create(is_leave_enabled)
 service_removal_filter = filters.create(is_service_removal_enabled)
+allowed_group_filter = filters.create(is_allowed_group)

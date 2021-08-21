@@ -5,6 +5,7 @@ from peewee import (
     BigIntegerField,
     TextField,
     BooleanField,
+    ForeignKeyField,
     SqliteDatabase
 )
 
@@ -14,25 +15,6 @@ allowed_groups = Cache(GroupSchema)
 messages_cache = Cache()
 
 db = SqliteDatabase('data.db')
-
-
-class Filter(Model):
-    message_id = BigIntegerField(null=True, default=None)
-    filter_text = TextField(null=True)
-    reply_text = TextField(null=True, default=None)
-    group_id = BigIntegerField()
-
-    class Meta:
-        database = db
-
-
-class User(Model):
-    user_id = BigIntegerField(unique=True)
-    warns = BigIntegerField()
-    allowed = BooleanField()
-
-    class Meta:
-        database = db
 
 
 class Group(Model):
@@ -47,6 +29,28 @@ class Group(Model):
     remove_service_msg = BooleanField()
     welcome_text = TextField(default='Welcome to the group {user}')
     exit_text = TextField(default='Goodbye, {user}')
+
+    class Meta:
+        database = db
+
+
+class Filter(Model):
+    message_id = BigIntegerField(null=True, default=None)
+    filter_text = TextField(null=True)
+    reply_text = TextField(null=True, default=None)
+    group_id = ForeignKeyField(model=Group,
+                               field='group_id',
+                               backref='filters',
+                               lazy_load=False)
+
+    class Meta:
+        database = db
+
+
+class User(Model):
+    user_id = BigIntegerField(unique=True)
+    warns = BigIntegerField()
+    allowed = BooleanField()
 
     class Meta:
         database = db

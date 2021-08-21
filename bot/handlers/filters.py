@@ -1,7 +1,8 @@
 from pyrogram import filters
 from pyrogram.handlers import MessageHandler
-from ..filters import allowed_group_filter
-from ..db import Filter, message_filters
+from ..filters import (allowed_group_filter)
+from .. import utils
+from ..db import Filter, allowed_groups
 from ..config import log_group
 
 
@@ -13,10 +14,12 @@ def handle_add_filter(client, msg):
     reply_text = None
 
     # Check if filter already exists
-    q = Filter.select().where(Filter.filter_text == filter_text)
+    q = Filter.select().where(
+        (Filter.filter_text == filter_text) & (Filter.group_id == msg.chat.id)
+    )
 
     if q.count():
-        msg.edit_text(f'Fitler already exists for {filter_text}')
+        msg.edit_text(f'Filter already exists for {filter_text}')
         return False
 
     if msg.reply_to_message:
@@ -29,9 +32,11 @@ def handle_add_filter(client, msg):
 
     f = Filter(filter_text=filter_text,
                reply_text=reply_text,
-               message_id=message_id)
+               message_id=message_id,
+               group_id=msg.chat.id)
     f.save()
-    message_filters.add(filter_text, f, replace=True)
+    group = utils.get_group(msg.chat.id)
+    allowed_groups.add(msg.chat.id, group, replace=True)
     msg.edit_text(f'Filter saved for {filter_text}')
 
 
@@ -40,69 +45,61 @@ def handle_remove_filter(client, msg):
         return False
     filter_text = msg.command[1]
 
-    q = Filter.select().where(Filter.filter_text == filter_text)
+    q = Filter.select().where(
+        (Filter.filter_text == filter_text) & (Filter.group_id == msg.chat.id)
+    )
+
     if not q.count():
         msg.edit_text(f'Filter does not exist for {filter_text}')
         return False
 
     q = q[0].delete_instance()
-    message_filters.remove(filter_text)
+    group = utils.get_group(msg.chat.id)
+    allowed_groups.add(msg.chat.id, group, replace=True)
     msg.edit_text(f'Filter removed for {filter_text}')
 
 
 def process_filter(client, msg):
-    msg_text = msg.text or msg.caption
-    # msg_text = msg_text.lower()
-    if msg_text:
-        msg_text = msg_text.lower()
-        """
-            Cast all of this to set to check intersection
-            to see if the message contains any words that
-            trigger a defined filter
-        """
-        filter_keys = [key.lower() for key in message_filters.allkeys()]
-        filter_keys = set(filter_keys)
-        text_words = set(msg_text.split(' '))
-        """
-            Get all matched filters
-        """
-        intersection = filter_keys.intersection(text_words)
-        print(intersection)
-        if not len(intersection):
-            return False
-        matches = list(intersection)
-        """
-            Get the first matched filter
-        """
-        filter_text = matches[0]
-        try:
-            filterr = message_filters.get(filter_text)
-        except Exception:
-            return False
+    group_id = msg.chat.id
 
-        if filterr.can_copy():
+    msg_text = msg.text or msg.caption
+    if msg_text:
+        msg_tokens = set(msg_text.lower().split(' '))
+        group = allowed_groups.get(group_id)
+        filter_tokens = set([f.filter_text for f in group.filters])
+        token_matches = filter_tokens.intersection(msg_tokens)
+        if not len(token_matches):
+            return False
+        # get the first match
+        token_matches = list(token_matches)
+        token_match = token_matches[0]
+        matched_filters = [
+            f for f in group.filters if f.filter_text == token_match
+        ]
+        if not len(matched_filters):
+            return False
+        matched_filter = matched_filters[0]
+
+        if matched_filter.can_copy():
             """
-                Copy the message if its a presaved message for the filter
+                Its a copy-able message so just copy it into the current chat
             """
-            # copy message
             client.copy_message(
                 from_chat_id=log_group,
                 chat_id=msg.chat.id,
-                message_id=filterr.message_id,
+                message_id=matched_filter.message_id,
                 reply_to_message_id=msg.message_id
             )
         else:
             """
-                If not just send the defined reply_text for the filter
+                Its a text reply based filter.
+                Simply reply with the text
             """
-            msg.reply_text(filterr.reply_text)
-    msg.continue_propagation()
+            msg.reply_text(matched_filter.reply_text)
 
 
 add_filter_handler = MessageHandler(
     handle_add_filter,
-    filters.command('filter', '.') & filters.me
-)
 
 rm_filter_handler = MessageHandler(
     handle_remove_filter,

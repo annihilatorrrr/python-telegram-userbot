@@ -48,6 +48,13 @@ def load_allowed_users():
         allowed_users.add(user.user_id, user)
 
 
+def get_group(group_id):
+    q = Group.select().where(Group.group_id == group_id)
+    if not q.count():
+        return False
+    return q.get()
+
+
 def get_users(allowed: bool):
     data = []
     for x in User.select(User.user_id).where(

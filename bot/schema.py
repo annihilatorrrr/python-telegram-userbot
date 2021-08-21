@@ -1,11 +1,26 @@
+import peewee
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import Optional, List, Any
+from pydantic.utils import GetterDict
+
+
+class PeeweeGetterDict(GetterDict):
+    """
+        For more information about this class
+        see https://fastapi.tiangolo.com/advanced/sql-databases-peewee/
+    """
+    def get(self, key: Any, default: Any = None):
+        res = getattr(self._obj, key, default)
+        if isinstance(res, peewee.ModelSelect):
+            return list(res)
+        return res
 
 
 class FilterSchema(BaseModel):
     message_id: Optional[int]
     filter_text: str
     reply_text: Optional[str]
+    group_id: int
 
     def can_copy(self):
         return bool(self.message_id)
@@ -32,6 +47,8 @@ class GroupSchema(BaseModel):
     welcome_text: str
     exit_text: str
     remove_service_msg: bool
+    filters: List[FilterSchema] = Field(default=[])
 
     class Config:
         orm_mode = True
+        getter_dict = PeeweeGetterDict
