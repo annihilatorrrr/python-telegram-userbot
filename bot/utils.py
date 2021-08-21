@@ -23,7 +23,7 @@ def load_allowed_groups():
         Load all allowed groups into cache on startup
     """
     for group in Group.select():
-        allowed_groups.add(group.group_id, group.group_id)
+        allowed_groups.add(group.group_id, group)
 
 
 def load_message_filters():

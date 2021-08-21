@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import Optional, List
+from typing import Optional
 
 
 class FilterSchema(BaseModel):
@@ -22,3 +22,16 @@ class UserSchema(BaseModel):
     class Config:
         orm_mode = True
         allow_population_by_field_name = True
+
+
+class GroupSchema(BaseModel):
+    group_id: int
+    enabled: bool
+    enable_welcome: bool
+    enable_leave: bool
+    welcome_text: str
+    exit_text: str
+    remove_service_msg: bool
+
+    class Config:
+        orm_mode = True

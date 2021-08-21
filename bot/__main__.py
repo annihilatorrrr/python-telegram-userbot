@@ -20,16 +20,43 @@ load_allowed_groups()
 
 
 logger.info('Attaching userbot handlers')
+
+"""
+    Handlers for adding/removing and processing filters
+"""
 userbot.add_handler(message_filters.add_filter_handler)
 userbot.add_handler(message_filters.rm_filter_handler)
 userbot.add_handler(message_filters.process_filter_handler, group=-0)
+
+"""
+    Handlers for handling groups.
+    Grabbing chat id
+    enable/disable group
+    enable/disable welcome messages
+    enable/disable removing of service messages
+"""
 userbot.add_handler(group.get_chatid_handler)
+userbot.add_handler(group.service_msg_handler)
 userbot.add_handler(group.new_member_handler)
-userbot.add_handler(group.member_exit_handler)
+userbot.add_handler(group.member_leave_handler)
 userbot.add_handler(group.allow_group_handler)
 userbot.add_handler(group.disallow_group_handler)
+userbot.add_handler(group.enable_welcome_handler)
+userbot.add_handler(group.disable_welcome_handler)
+userbot.add_handler(group.enable_service_handler)
+userbot.add_handler(group.disable_service_handler)
+userbot.add_handler(group.enable_leave_handler)
+userbot.add_handler(group.disable_leave_handler)
+userbot.add_handler(group.configure_greetings_handler)
 userbot.add_handler(group.random_handler)
+
 userbot.add_handler(urbandict.urbandict_handler)
+
+"""
+    PM Handlers
+    Allow/block user
+    PMSecurity
+"""
 userbot.add_handler(users.pm_handler, group=-1)
 userbot.add_handler(users.approve_user_handler)
 userbot.add_handler(users.block_user_handler)

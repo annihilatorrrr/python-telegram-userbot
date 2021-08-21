@@ -1,4 +1,4 @@
-from .schema import UserSchema, FilterSchema
+from .schema import UserSchema, FilterSchema, GroupSchema
 from .cache import Cache
 from peewee import (
     Model,
@@ -10,7 +10,7 @@ from peewee import (
 
 allowed_users = Cache(UserSchema)
 message_filters = Cache(FilterSchema)
-allowed_groups = Cache()
+allowed_groups = Cache(GroupSchema)
 messages_cache = Cache()
 
 db = SqliteDatabase('data.db')
@@ -20,6 +20,7 @@ class Filter(Model):
     message_id = BigIntegerField(null=True, default=None)
     filter_text = TextField(null=True)
     reply_text = TextField(null=True, default=None)
+    group_id = BigIntegerField()
 
     class Meta:
         database = db
@@ -28,7 +29,6 @@ class Filter(Model):
 class User(Model):
     user_id = BigIntegerField(unique=True)
     warns = BigIntegerField()
-    # banned or not
     allowed = BooleanField()
 
     class Meta:
@@ -36,7 +36,17 @@ class User(Model):
 
 
 class Group(Model):
+    """
+        Below exit message refers to a goodbye message that the
+        userbot will send when a user leaves a group chat.
+    """
     group_id = BigIntegerField(unique=True)
+    enabled = BooleanField()
+    enable_welcome = BooleanField()  # Are welcome messages enabled ?
+    enable_leave = BooleanField()  # Are exit messages enabled
+    remove_service_msg = BooleanField()
+    welcome_text = TextField(default='Welcome to the group {user}')
+    exit_text = TextField(default='Goodbye, {user}')
 
     class Meta:
         database = db
