@@ -7,14 +7,11 @@ from .handlers import (filters as message_filters,
                        users,
                        bot_misc)
 from .utils import (load_allowed_users,
-                    load_message_filters,
                     load_allowed_groups)
 
 
 logger.info('Loading user info to cache')
 load_allowed_users()
-logger.info('Loading filters into cache')
-load_message_filters()
 logger.info('Loading allowed groups into cache')
 load_allowed_groups()
 
@@ -63,9 +60,11 @@ userbot.add_handler(users.block_user_handler)
 
 logger.info('Attaching bot handlers')
 bot.add_handler(bot_misc.pm_check_handler)
+bot.add_handler(bot_misc.inline_deny_handler)
 bot.add_handler(bot_misc.warns_check_handler)
 bot.add_handler(bot_misc.contact_me_handler)
 bot.add_handler(bot_misc.about_me_handler)
+bot.add_handler(bot_misc.misc_handler)
 bot.add_handler(bot_misc.deny_user_handler)
 bot.add_handler(bot_misc.approve_user_handler)
 bot.add_handler(bot_misc.unblock_user_handler)

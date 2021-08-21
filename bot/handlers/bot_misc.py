@@ -22,7 +22,7 @@ from pyrogram.handlers import (
 def deny_access(msg):
     msg.answer(
         results=[],
-        switch_pm_text='You are not authorized to use this bot.',
+        switch_pm_text='This bot is for owner only.',
         switch_pm_parameter='createown',
         cache_time=0,
         is_personal=1,
@@ -54,7 +54,9 @@ def send_pm_engine(msg):
             ],
             [
                 InlineKeyboardButton(text='Misc',
-                                     callback_data='misc_me')
+                                     callback_data='misc_me'),
+                InlineKeyboardButton(text='Some link',
+                                     url='https://google.com')
             ]
         ]
     )
@@ -73,6 +75,10 @@ def handle_pm_check(client, msg):
         return deny_access(msg)
 
     send_pm_engine(msg)
+
+
+def handle_inline_deny(client, msg):
+    return deny_access(msg)
 
 
 def handle_warns_check(client, msg):
@@ -211,12 +217,17 @@ def handle_unblock_user(client, msg):
 
 
 def handle_misc_me(client, msg):
-    msg.answer('This text will be replaced')
+    msg.answer('This text will be replaced [Test](http://google.com)')
 
 
 pm_check_handler = InlineQueryHandler(
     handle_pm_check,
     filters.regex('pm_check'))
+
+inline_deny_handler = InlineQueryHandler(
+    handle_inline_deny,
+    ~filters.user(owner_id)
+)
 
 warns_check_handler = CallbackQueryHandler(
     handle_warns_check,
@@ -233,7 +244,7 @@ about_me_handler = CallbackQueryHandler(
     filters.regex('about_me')
 )
 
-about_me_handler = CallbackQueryHandler(
+misc_handler = CallbackQueryHandler(
     handle_misc_me,
     filters.regex('misc_me')
 )

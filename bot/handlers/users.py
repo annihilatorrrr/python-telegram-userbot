@@ -5,9 +5,9 @@ from ..db import User, allowed_users, messages_cache
 from ..config import (bot_username, warn_limit,
                       pm_log_group)
 
-from ..utils import (get_users,
-                     is_user,
-                     get_user)
+from ..utils import (is_user,
+                     get_user,
+                     unblock_keyboard)
 
 
 def send_pm_engine(client, msg):
@@ -60,9 +60,11 @@ def handle_pm(client, msg):
 
     """
         Delete the sender's message.
-        Cos otherwise its annoying, no.
+        Cos otherwise its annoying.
+
+        To-do : Add a config flag to enable/disable deleting user messages
     """
-    msg.delete()
+    # msg.delete()
     """
         Send PM engine and grab the message id
     """
@@ -83,13 +85,12 @@ def handle_pm(client, msg):
         """
             Block notification to PMLog
         """
-        client.send_message(
+        bot.send_message(
             chat_id=pm_log_group,
             text=(f'{msg.from_user.first_name}({msg.from_user.id})'
-                  ' was blocked for reaching maximum warns.')
+                  ' was blocked for reaching maximum warns.'),
+            reply_markup=unblock_keyboard(from_user)
         )
-
-    # msg.delete()
 
 
 def handle_approve_user(client, msg):
