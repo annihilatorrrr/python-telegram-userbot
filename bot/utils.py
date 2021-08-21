@@ -18,6 +18,34 @@ def get_message_filters():
     return data
 
 
+def process_group_info(group):
+    """
+        You might be thinking what kind of idiot concats strings like this
+        when there's clearly f-strings.
+        I think f-strings look ugly in some cases. This is one of them.
+    """
+    NEWLINE = '\n'
+    bool_dict = {
+        True: 'Enabled',
+        False: 'Disabled'
+    }
+    retrieve = bool_dict.get
+    output = (
+        '<b>Welcome greeting</b>: <i>{welcome_greeting}</i>' + NEWLINE +
+        '<b>Leave greeting</b>: <i>{leave_greeting}</i>' + NEWLINE +
+        '<b>Welcome text</b>: <i>{welcome_text}</i>' + NEWLINE +
+        '<b>Leave text</b>: <i>{leave_text}</i>' + NEWLINE +
+        '<b>Remove service messages</b>: <i>{rm_enabled}</i>' + NEWLINE
+    )
+    return output.format(
+        welcome_greeting=retrieve(group.enable_welcome),
+        leave_greeting=retrieve(group.enable_leave),
+        welcome_text=group.welcome_text,
+        leave_text=group.exit_text,
+        rm_enabled=retrieve(group.remove_service_msg)
+    )
+
+
 def load_allowed_groups():
     """
         Load all allowed groups into cache on startup

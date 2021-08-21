@@ -48,7 +48,7 @@ userbot.add_handler(group.disable_service_handler)
 userbot.add_handler(group.enable_leave_handler)
 userbot.add_handler(group.disable_leave_handler)
 userbot.add_handler(group.configure_greetings_handler)
-userbot.add_handler(group.random_handler)
+userbot.add_handler(group.group_info_handler)
 
 userbot.add_handler(urbandict.urbandict_handler)
 

@@ -100,6 +100,8 @@ def process_filter(client, msg):
 
 add_filter_handler = MessageHandler(
     handle_add_filter,
+    filters.command('filter', '.') & filters.me
+)
 
 rm_filter_handler = MessageHandler(
     handle_remove_filter,

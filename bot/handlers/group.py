@@ -5,7 +5,7 @@ from ..filters import (allowed_group_filter,
                        welcome_enabled_filter,
                        leave_enabled_filter,
                        service_removal_filter)
-
+from .. import utils
 from logzero import logger
 
 
@@ -181,9 +181,17 @@ def handle_configure_greetings(client, msg):
     )
 
 
-def handle_random(client, msg):
-    print('i got random')
+def handle_group_info(client, msg):
+    group = allowed_groups.get(msg.chat.id)
+    text = utils.process_group_info(group)
+    msg.edit_text(text, parse_mode="HTML")
 
+
+"""
+    You will notice that certain handlers are not using ~filters.private
+    This is because allowed_group_filter will also check if the message is
+    a group chat.
+"""
 
 service_msg_handler = MessageHandler(
     handle_service_message,
@@ -274,7 +282,7 @@ configure_greetings_handler = MessageHandler(
     ) & allowed_group_filter
 )
 
-random_handler = MessageHandler(
-    handle_random,
-    ((filters.command('random', '.') & filters.me) & allowed_group_filter)
+group_info_handler = MessageHandler(
+    handle_group_info,
+    ((filters.command('group_info', '.') & filters.me) & allowed_group_filter)
 )
