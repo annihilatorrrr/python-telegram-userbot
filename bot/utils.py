@@ -1,3 +1,7 @@
+from pyrogram.types import (
+    InlineKeyboardMarkup as Kb,
+    InlineKeyboardButton as Button
+)
 from .db import (Filter,
                  User,
                  Group,
@@ -16,6 +20,17 @@ def get_message_filters():
             cfg['reply_text'] = x.reply_text
         data[x.filter_text] = cfg
     return data
+
+
+def unblock_keyboard(user_id):
+    print('im called')
+    return Kb(
+        [
+            [
+                Button('Unblock', callback_data=f'unblock_user {user_id}')
+            ]
+        ]
+    )
 
 
 def process_group_info(group):
