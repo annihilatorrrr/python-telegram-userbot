@@ -70,10 +70,20 @@ bot.add_handler(bot_misc.approve_user_handler)
 bot.add_handler(bot_misc.unblock_user_handler)
 
 
-userbot.start()
-bot.start()
+# userbot.start()
+# bot.start()
 
-idle()
+# idle()
 
-userbot.stop()
-bot.stop()
+# userbot.stop()
+# bot.stop()
+
+if __name__ == '__main__':
+    try:
+        userbot.start()
+        bot.start()
+        idle()
+    except KeyboardInterrupt:
+        print('Exitting...')
+        userbot.stop()
+        bot.stop()

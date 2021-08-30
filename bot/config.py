@@ -2,6 +2,7 @@ from dotenv import load_dotenv
 import os
 
 load_dotenv()
+phone_number = os.getenv('phone_number')
 api_id = os.getenv('api_id')
 api_hash = os.getenv('api_hash')
 
