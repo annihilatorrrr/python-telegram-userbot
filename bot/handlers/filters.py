@@ -68,9 +68,12 @@ def process_filter(client, msg):
         cache -> reject if it does because its a duplicate (idk why that
         happens)
     """
+    print(processed_cache)
     hashed = utils.hashed_msg_id(group_id, message_id)
     if hashed in processed_cache:
+        print('Duplicate detected. Rejecting update')
         return False
+    processed_cache.append(hashed)
 
     msg_text = msg.text or msg.caption
     if msg_text:
@@ -94,6 +97,8 @@ def process_filter(client, msg):
             """
                 Its a copy-able message so just copy it into the current chat
             """
+            print('Copying message filter for ', msg.chat_id, msg.message_id)
+            print(hashed)
             client.copy_message(
                 from_chat_id=log_group,
                 chat_id=msg.chat.id,
