@@ -1,11 +1,13 @@
 from .init import userbot, bot
 from pyrogram import idle
 from logzero import logger
+from apscheduler.schedulers.background import BackgroundScheduler
 from .handlers import (filters as message_filters,
                        group,
                        urbandict,
                        users,
                        bot_misc)
+from . import db
 from .utils import (load_allowed_users,
                     load_allowed_groups)
 
@@ -69,17 +71,12 @@ bot.add_handler(bot_misc.deny_user_handler)
 bot.add_handler(bot_misc.approve_user_handler)
 bot.add_handler(bot_misc.unblock_user_handler)
 
-
-# userbot.start()
-# bot.start()
-
-# idle()
-
-# userbot.stop()
-# bot.stop()
+scheduler = BackgroundScheduler()
+scheduler.add_job(db.clear_processed_cache, "interval", seconds=30)
 
 if __name__ == '__main__':
     try:
+        scheduler.start()
         userbot.start()
         bot.start()
         idle()

@@ -8,6 +8,7 @@ from .db import (Filter,
                  allowed_users,
                  message_filters,
                  allowed_groups)
+import hashlib
 
 
 def get_message_filters():
@@ -22,8 +23,20 @@ def get_message_filters():
     return data
 
 
+def hashed_msg_id(chat_id, message_id):
+    """
+        Returns a sha1 hash of group_id+msg_id
+
+        This hash is used to identify a message that has been processed by
+        the handler that deals with processing filters. There is an issue where
+        the message is handled twice in super groups.
+        (Try webhooks, looser.)
+    """
+    hash_ = (str(chat_id) + str(message_id)).encode()
+    return hashlib.sha1(hash_).hexdigest()
+
+
 def unblock_keyboard(user_id):
-    print('im called')
     return Kb(
         [
             [

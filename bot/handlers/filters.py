@@ -2,7 +2,7 @@ from pyrogram import filters
 from pyrogram.handlers import MessageHandler
 from ..filters import (allowed_group_filter)
 from .. import utils
-from ..db import Filter, allowed_groups
+from ..db import (Filter, allowed_groups, processed_cache)
 from ..config import log_group
 
 
@@ -61,6 +61,16 @@ def handle_remove_filter(client, msg):
 
 def process_filter(client, msg):
     group_id = msg.chat.id
+    message_id = msg.message_id
+
+    """
+        Hash the message id and chat id, check if its in the
+        cache -> reject if it does because its a duplicate (idk why that
+        happens)
+    """
+    hashed = utils.hashed_msg_id(group_id, message_id)
+    if hashed in processed_cache:
+        return False
 
     msg_text = msg.text or msg.caption
     if msg_text:
@@ -96,6 +106,8 @@ def process_filter(client, msg):
                 Simply reply with the text
             """
             msg.reply_text(matched_filter.reply_text)
+
+    processed_cache.append(hashed)
 
 
 add_filter_handler = MessageHandler(
