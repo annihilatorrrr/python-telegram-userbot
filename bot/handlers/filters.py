@@ -111,8 +111,7 @@ def process_filter(client, msg):
                 Simply reply with the text
             """
             msg.reply_text(matched_filter.reply_text)
-
-    processed_cache.append(hashed)
+        processed_cache.append(hashed)
 
 
 add_filter_handler = MessageHandler(
