@@ -13,7 +13,7 @@ allowed_users = Cache(UserSchema)
 message_filters = Cache(FilterSchema)
 allowed_groups = Cache(GroupSchema)
 messages_cache = Cache()
-processed_cache = [1, 2, 3, 4, 5]
+processed_cache = []
 
 
 def clear_processed_cache():

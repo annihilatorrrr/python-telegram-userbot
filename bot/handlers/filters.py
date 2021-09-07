@@ -4,31 +4,31 @@ from ..filters import (allowed_group_filter)
 from .. import utils
 from ..db import (Filter, allowed_groups, processed_cache)
 from ..config import log_group
+import re
 
 
 def handle_add_filter(client, msg):
     if len(msg.command) <= 1:
         return False
-    filter_text = msg.command[1].lower()
     message_id = None
     reply_text = None
 
-    # Check if filter already exists
+    if msg.reply_to_message:
+        c_msg = msg.reply_to_message.copy(log_group)
+        message_id = c_msg.message_id
+        filter_text = msg.text.replace('.filter', '')
+    else:
+        if len(msg.command) <= 2:
+            return False
+        filter_text = msg.command[1].lower()
+        reply_text = ' '.join(msg.command[2:])
+
     q = Filter.select().where(
         (Filter.filter_text == filter_text) & (Filter.group_id == msg.chat.id)
     )
 
     if q.count():
         msg.edit_text(f'Filter already exists for {filter_text}')
-        return False
-
-    if msg.reply_to_message:
-        c_msg = msg.reply_to_message.copy(log_group)
-        message_id = c_msg.message_id
-    else:
-        if len(msg.command) <= 2:
-            return False
-        reply_text = ' '.join(msg.command[2:])
 
     f = Filter(filter_text=filter_text,
                reply_text=reply_text,
@@ -60,6 +60,56 @@ def handle_remove_filter(client, msg):
 
 
 def process_filter(client, msg):
+    group_id = msg.chat.id
+    message_id = msg.message_id
+
+    """
+        Hash the message id and chat id, check if its in the
+        cache -> reject if it does because its a duplicate (idk why that
+        happens)
+    """
+    hashed = utils.hashed_msg_id(group_id, message_id)
+    if hashed in processed_cache:
+        print('Duplicate message detected. Rejecting message')
+        return False
+    processed_cache.append(hashed)
+
+    msg_text = msg.text or msg.caption
+    if msg_text:
+        msg_text = msg_text.lower()
+        group = allowed_groups.get(group_id)
+        filters = group.filters
+        matched_filter = None
+        for filt in filters:
+            if utils.match_tokens(match=filt.filter_text,
+                                  against=msg_text):
+                matched_filter = filt
+                break
+        if not matched_filter:
+            return False
+
+        if matched_filter.can_copy():
+            """
+                Its a copy-able message so just copy it into the current chat
+            """
+            print('Copying message filter for ', msg.chat.id, msg.message_id)
+            print(hashed)
+            client.copy_message(
+                from_chat_id=log_group,
+                chat_id=msg.chat.id,
+                message_id=matched_filter.message_id,
+                reply_to_message_id=msg.message_id
+            )
+        else:
+            """
+                Its a text reply based filter.
+                Simply reply with the text
+            """
+            msg.reply_text(matched_filter.reply_text)
+        processed_cache.append(hashed)
+
+
+def process_filter_old(client, msg):
     group_id = msg.chat.id
     message_id = msg.message_id
 

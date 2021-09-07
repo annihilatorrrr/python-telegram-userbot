@@ -11,6 +11,31 @@ from .db import (Filter,
 import hashlib
 
 
+def match_tokens(match, against):
+    """
+        This is simply a function to check if tokens of needle appear
+        in haystack in the right order
+
+        match_tokens('hello hello', 'hello hello i am John') will return True
+        match_tokens('hello hello', 'hello yello hello i am John') will return
+        False
+    """
+    match_tokens = match.split()
+    against_tokens = against.split()
+
+    try:
+        first_index = against_tokens.index(match_tokens[0])
+        for i in range(1, len(match_tokens)):
+            curr = first_index + i
+            if against_tokens[curr] == match_tokens[i]:
+                continue
+            else:
+                return False
+        return True
+    except ValueError:
+        return False
+
+
 def get_message_filters():
     data = {}
     for x in Filter.select():
